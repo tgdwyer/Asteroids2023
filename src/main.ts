@@ -7,11 +7,11 @@ Observables allow us to capture asynchronous actions like user interface events 
 As an example we will build a little "Asteroids" game using Observables.  We're going to use [rxjs](https://rxjs-dev.firebaseapp.com/) as our Observable implementation, and we are going to render it in HTML using SVG.
 We're also going to take some pains to make pure functional code (and lots of beautiful curried lambda (arrow) functions). We'll use [typescript type annotations](https://www.typescriptlang.org/) to help us ensure that our data is indeed immutable and to guide us in plugging everything together without type errors.
  */
-import { fromEvent, interval, Subscription, merge } from 'rxjs';
-import { map, filter, scan } from 'rxjs/operators';
-import { Tick, Rotate, Thrust, Shoot, Key, Event } from '/src/types';
-import { reduceState, initialState } from '/src/state.ts';
-import { updateView } from '/src/view.ts';
+import { fromEvent, interval, Subscription, Observable } from 'rxjs';
+import { map, filter } from 'rxjs/operators';
+import { Key, Event, Action, State } from './types'
+import { Tick, Rotate, Thrust, Shoot } from './state';
+import { IMPLEMENT_THIS } from './util';
 
 /////////////////////////////////////////////////////////////////
 //
@@ -46,37 +46,33 @@ import { updateView } from '/src/view.ts';
  * Main game function.  Initialises all Observable streams.
  */
 function asteroids() {
-
   const
-    gameClock$ = interval(10)
+    tick$ = interval(10)
       .pipe(map(elapsed => new Tick(elapsed))),
+
     key$ = (e: Event, k: Key) =>
       fromEvent<KeyboardEvent>(document, e)
         .pipe(
           filter(({ code }) => code === k),
           filter(({ repeat }) => !repeat)),
 
-    startLeftRotate$  = key$('keydown', 'ArrowLeft').pipe(map(_ => new Rotate(-.1))),
+    startLeftRotate$ = key$('keydown', 'ArrowLeft').pipe(map(_ => new Rotate(-.1))),
     startRightRotate$ = key$('keydown', 'ArrowRight').pipe(map(_ => new Rotate(.1))),
-    stopLeftRotate$   = key$('keyup', 'ArrowLeft').pipe(map(_ => new Rotate(0))),
-    stopRightRotate$  = key$('keyup', 'ArrowRight').pipe(map(_ => new Rotate(0))),
-    startThrust$      = key$('keydown', 'ArrowUp').pipe(map(_ => new Thrust(true))),
-    stopThrust$       = key$('keyup', 'ArrowUp').pipe(map(_ => new Thrust(false))),
-    shoot$            = key$('keydown', 'Space').pipe(map(_ => new Shoot()))
+    stopLeftRotate$ = key$('keyup', 'ArrowLeft').pipe(map(_ => new Rotate(0))),
+    stopRightRotate$ = key$('keyup', 'ArrowRight').pipe(map(_ => new Rotate(0))),
+    startThrust$ = key$('keydown', 'ArrowUp').pipe(map(_ => new Thrust(true))),
+    stopThrust$ = key$('keyup', 'ArrowUp').pipe(map(_ => new Thrust(false))),
+    shoot$ = key$('keydown', 'Space').pipe(map(_ => new Shoot()))
 
   /**
    * Exercise 1: Implement the main game stream pipeline - add imports above as necessary.
-   * We have the following incoming streams: gameClock$, startLeftRotate$, startRightRotate$, stopLeftRotate$, stopRightRotate$, startThrust$, stopThrust$, shoot$.
+   * We have the following incoming Action streams: tick$, startLeftRotate$, startRightRotate$, stopLeftRotate$, stopRightRotate$, startThrust$, stopThrust$, shoot$.
    * We need to do something with initialState and reduceState (see state.ts), 
    * and then finally we'll somewhere need to call our effectful updateView function
    */
-  const subscription: Subscription =  /* IMPLEMENT_THIS */
-    merge(startLeftRotate$, startRightRotate$,
-      stopLeftRotate$, stopRightRotate$,
-      startThrust$, stopThrust$, shoot$,
-      gameClock$)
-    .pipe(scan(reduceState,initialState))
-    .subscribe(updateView(()=>subscription.unsubscribe()))
+  const action$: Observable<Action> = IMPLEMENT_THIS;
+  const state$: Observable<State> = IMPLEMENT_THIS;
+  const subscription: Subscription = IMPLEMENT_THIS;
 }
 
 /**

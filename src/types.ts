@@ -1,21 +1,21 @@
 // Common Asteroids type definitions
-export { Constants, Tick, Rotate, Thrust, Shoot }
-export type { Circle, ObjectId, Body, State, ViewType, Key, Event }
+export { Constants }
+export type { Circle, ObjectId, Body, State, ViewType, Key, Event, Action }
 
 import { Vec } from './util'
 
 const
-    Constants = {
-        CanvasSize: 600,
-        BulletExpirationTime: 5000,
-        BulletRadius: 3,
-        BulletVelocity: 2,
-        StartRockRadius: 30,
-        StartRocksCount: 5,
-        RotationAcc: 0.1,
-        ThrustAcc: 0.1,
-        StartTime: 0
-    } as const
+  Constants = {
+    CanvasSize: 600,
+    BulletExpirationTime: 5000,
+    BulletRadius: 3,
+    BulletVelocity: 2,
+    StartRockRadius: 30,
+    StartRocksCount: 5,
+    RotationAcc: 0.1,
+    ThrustAcc: 0.1,
+    StartTime: 0
+  } as const
 
 /**
  * a string literal type for each key used in game control
@@ -32,12 +32,6 @@ type Event = 'keydown' | 'keyup'
  */
 type ViewType = 'ship' | 'rock' | 'bullet'
 
-// Four Action types that trigger game state transitions
-class Tick { constructor(public readonly elapsed: number) { } }
-class Rotate { constructor(public readonly direction: number) { } }
-class Thrust { constructor(public readonly on: boolean) { } }
-class Shoot { constructor() { } }
-
 type Circle = Readonly<{ pos: Vec, radius: number }>
 
 /**
@@ -45,19 +39,21 @@ type Circle = Readonly<{ pos: Vec, radius: number }>
  */
 type ObjectId = Readonly<{ id: string, createTime: number }>
 
-interface IBody extends Circle, ObjectId {
+/**
+ * Every object that participates in physics is a Body
+ */
+type Body = Circle & ObjectId & Readonly<{
   viewType: ViewType,
   vel: Vec,
   acc: Vec,
   angle: number,
   rotation: number,
   torque: number
-}
+}>
 
-// Every object that participates in physics is a Body
-type Body = Readonly<IBody>
-
-// Game state
+/**
+ * Game state
+ */
 type State = Readonly<{
   time: number,
   ship: Body,
@@ -67,3 +63,10 @@ type State = Readonly<{
   objCount: number,
   gameOver: boolean
 }>
+
+/**
+ * Actions modify state
+ */
+interface Action {
+  apply(s: State): State;
+}
