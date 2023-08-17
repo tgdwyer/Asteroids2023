@@ -7,11 +7,12 @@ Observables allow us to capture asynchronous actions like user interface events 
 As an example we will build a little "Asteroids" game using Observables.  We're going to use [rxjs](https://rxjs-dev.firebaseapp.com/) as our Observable implementation, and we are going to render it in HTML using SVG.
 We're also going to take some pains to make pure functional code (and lots of beautiful curried lambda (arrow) functions). We'll use [typescript type annotations](https://www.typescriptlang.org/) to help us ensure that our data is indeed immutable and to guide us in plugging everything together without type errors.
  */
-import { fromEvent, interval, Subscription, Observable } from 'rxjs';
-import { map, filter } from 'rxjs/operators';
+import { fromEvent, interval, Subscription, Observable, merge } from 'rxjs';
+import { map, filter, scan } from 'rxjs/operators';
 import { Key, Event, Action, State } from './types'
-import { Tick, Rotate, Thrust, Shoot } from './state';
+import { Tick, Rotate, Thrust, Shoot, reduceState, initialState } from './state';
 import { IMPLEMENT_THIS } from './util';
+import { updateView } from './view';
 
 /////////////////////////////////////////////////////////////////
 //
@@ -70,9 +71,9 @@ function asteroids() {
    * We need to do something with initialState and reduceState (see state.ts), 
    * and then finally we'll somewhere need to call our effectful updateView function
    */
-  const action$: Observable<Action> = IMPLEMENT_THIS;
-  const state$: Observable<State> = IMPLEMENT_THIS;
-  const subscription: Subscription = IMPLEMENT_THIS;
+  const action$: Observable<Action> = merge(tick$, startLeftRotate$, stopLeftRotate$, startRightRotate$, stopRightRotate$, startThrust$, stopThrust$, shoot$);
+  const state$: Observable<State> = action$.pipe(scan(reduceState, initialState));
+  const subscription: Subscription = state$.subscribe(updateView(()=>subscription.unsubscribe()));
 }
 
 /**
