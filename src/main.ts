@@ -11,7 +11,6 @@ import { fromEvent, interval, Subscription, Observable, merge } from 'rxjs';
 import { map, filter, scan } from 'rxjs/operators';
 import { Key, Event, Action, State } from './types'
 import { Tick, Rotate, Thrust, Shoot, reduceState, initialState } from './state';
-import { IMPLEMENT_THIS } from './util';
 import { updateView } from './view';
 
 /////////////////////////////////////////////////////////////////
